@@ -3,3 +3,5 @@ h1. URL2QR
 Creates a QR-code from the current URL and displays it in a block.
 
 Configure block to change title, image alt text and add a description.
+
+Uses Googles chart API: http://code.google.com/apis/chart/types.html#qrcodes
