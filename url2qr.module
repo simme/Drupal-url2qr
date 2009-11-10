@@ -1,0 +1,99 @@
+<?php
+/*
+function url2qr_menu() {
+  $items = array();
+
+  $items['admin/settings/url2qr'] = array(
+    'title' => 'URL 2 QR',
+    'description' => 'Settings for url-to-qr-code generator.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_url2qr_settings'),
+    'file' => 'url2qr_admin.inc.php',
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('administer site configuration'),
+  );
+  
+  return $items;
+}*/
+
+/**
+ * Hook_block implementation
+ */
+function url2qr_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    // List blocks
+    case 'list':
+      $blocks = array();
+      $blocks[0] = array(
+        'info' => t('URL2QR'),
+        'cache' => BLOCK_CACHE_PER_PAGE,
+      );
+      return $blocks;
+      break;
+    
+    // Display block
+    case 'view':
+      $output = '<div class="url2qr">';
+      
+      // Get alt
+      $alt = url2qr_replace(check_plain(variable_get('url2qr_alt_text', '%url%')));
+      
+      // Generate output
+      $url = url($_GET['q'], array('absolute' => TRUE));
+      $x = 150;
+      $y = 150;
+      $output .= sprintf('<img src="http://chart.apis.google.com/chart?chs=%dx%d&cht=qr&chl=%s&choe=UTF-8" alt="%s" />',
+        $x,
+        $y,
+        $url,
+        $alt
+      );
+      
+      // Get description
+      $description = variable_get('url2qr_description', '');
+      if(!empty($description)) {
+        $output .= '<p class="url2qr_description">' . check_plain($description) . '</p>';
+      }
+      
+      $output .= '</div>';
+      
+      return array('content' => $output,);
+      break;
+      
+    // Configure
+    case 'configure':$form = array();
+      $form = array();
+  
+      $form['url2qr_alt_text'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Alt text for QR-code image'),
+        '#description' => t('%url% will be replaced with the current URL.'),
+        '#default_value' => variable_get('url2qr_alt_text', '%url%'),
+      );
+  
+      $form['url2qr_description'] = array(
+        '#type' => 'textarea',
+        '#title' => t('Description'),
+        '#description' => t('Supply a description text for your visitors. Rendered below the image.'),
+        '#default_value' => variable_get('url2qr_description', ''),
+      );
+  
+      return $form;
+      break;
+  
+    // Save
+    case 'save':
+      variable_set('url2qr_alt_text', $edit['url2qr_alt_text']);
+      variable_set('url2qr_description', $edit['url2qr_description']);
+      break;
+  }
+}
+
+/**
+ * Replace %url% with current url
+ * @param string str
+ * @return string replaced
+ */
+function url2qr_replace($str) {
+  return str_ireplace('%url%', url($_GET['q'], array('absolute' => TRUE)), $str);
+}

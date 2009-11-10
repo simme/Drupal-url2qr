@@ -1,0 +1,4 @@
+; $Id$
+name = URL2QR
+description = Converts the current url to a QR code
+core = 6.x
